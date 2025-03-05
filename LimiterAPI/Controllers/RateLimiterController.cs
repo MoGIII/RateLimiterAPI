@@ -27,8 +27,8 @@ namespace LimiterAPI.Controllers
             return Ok($"Rate limits were successfully set for user {user}");
         }
 
-        [HttpGet("execute")]
-        public async Task<IActionResult> Perform(Func<Task<object>> func)
+        [HttpPost("execute")]
+        public async Task<IActionResult> Perform([FromBody] Func<Task<object>> func)
         {
             string? user = Request.Headers["X-User_Id"];
             if (string.IsNullOrEmpty(user))
