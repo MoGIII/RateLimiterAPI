@@ -1,0 +1,6 @@
+@LimiterAPI_HostAddress = http://localhost:5047
+
+GET {{LimiterAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
