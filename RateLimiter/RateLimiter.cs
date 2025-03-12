@@ -1,4 +1,5 @@
-﻿using RateLimiter.Models;
+﻿using Microsoft.AspNetCore.Http;
+using RateLimiter.Models;
 using System.Collections.Concurrent;
 
 namespace RateLimiter
@@ -13,8 +14,13 @@ namespace RateLimiter
     public class RateLimiter
     {
         private readonly ConcurrentDictionary<string, List<DateTime>> _requestLogs = new();
-
+        private readonly HttpClient _httpClient;
         private readonly ConcurrentDictionary<string, List<RateLimitRule>> _userRateLimits = new();
+
+        public RateLimiter()
+        {
+            _httpClient = new HttpClient();
+        }
 
         /// <summary>
         /// Set the rate limits that the user requests for his request
@@ -73,15 +79,29 @@ namespace RateLimiter
         /// <summary>
         /// Invoke the task if the limit was not reached
         /// </summary>
-        public async Task<(bool Allowed, T? Result)> Perform<T>(string userId, Func<Task<T>> function)
+        //public async Task<(bool Allowed, T? Result)> Perform<T>(string userId, Func<Task<T>> function)
+        //{
+        //    if (!IsLimitReached(userId))
+        //    {
+        //        return (false, default);
+        //    }
+
+        //    T result = await function();
+        //    return (true, result);
+        //}
+
+        public async Task<HttpResponseMessage> PerformAsync(string userId, HttpRequestMessage request)
         {
             if (!IsLimitReached(userId))
             {
-                return (false, default);
+                return new HttpResponseMessage(System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    Content = new StringContent("Rate limit exceeded. Try again later.")
+                };
             }
-
-            T result = await function();
-            return (true, result);
+            return await _httpClient.SendAsync(request);
         }
+
+
     }
 }

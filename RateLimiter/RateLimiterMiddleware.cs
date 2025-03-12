@@ -20,7 +20,7 @@ namespace RateLimiter
 
         public async Task Invoke(HttpContext context)
         {
-            string userId = context.Request.Headers["X-User-Id"];
+            string? userId = context.Request.Headers["X-User-Id"];
             if (string.IsNullOrEmpty(userId))
             {
                 context.Response.StatusCode = 400;

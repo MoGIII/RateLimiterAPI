@@ -28,17 +28,17 @@ namespace LimiterAPI.Controllers
         }
 
         [HttpPost("execute")]
-        public async Task<IActionResult> Perform([FromBody] Func<Task<object>> func)
+        public async Task<IActionResult> Perform([FromBody] HttpRequestMessage request)
         {
-            string? user = Request.Headers["X-User_Id"];
+            string? user = Request.Headers["X-User-Id"];
             if (string.IsNullOrEmpty(user))
             {
-                return BadRequest("Missing X-User_Id header");
+                return BadRequest("Missing X-User-Id header");
             }
 
-            var (allowed, result) = await _limiter.Perform(user, func);
+            var result = await _limiter.PerformAsync(user, request);
 
-            if (!allowed)
+            if (result.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
                 return StatusCode(429, "Rate limit exceeded. Try again later.");
             }
